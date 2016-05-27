@@ -2,6 +2,7 @@
 
 import cherrypy
 
+
 class WebServer(object):
     gyro_mon = None
 
