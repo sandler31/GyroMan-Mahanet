@@ -1,5 +1,7 @@
-#define ROLL_PWM_PORT 5
-#define PITCH_PWM_PORT 6
+#define XAXIS_PWM_PORT 5
+#define YAXIS_PWM_PORT 6
+#define ROTATION_PWM_PORT 7
+#define THROTTLE_PWM_PORT 8
 #define LOG_NONE 0
 #define LOG_INFO 1
 #define LOG_ERROR 1
@@ -44,30 +46,42 @@ void loop()
   Log(LOG_DEBUG, "Data: " + data + "\n");
 
   // Get all delimeters
-  int startIndex = data.indexOf('$');
+  int xIndex = data.indexOf('X');
+  int yIndex = data.indexOf('Y');
+  int rIndex = data.indexOf('R');
+  int tIndex = data.indexOf('T');
   int endIndex = data.indexOf('#');
-  int delim = data.indexOf('|');
 
-  Log(LOG_DEBUG, "Indexes: " + String(startIndex) + ", " 
-                             + String(endIndex) + ", "
-                             + String(delim) + "\n");
+  Log(LOG_DEBUG, "Indexes: " + String(xIndex) + ", " 
+                             + String(yIndex) + ", "
+                             + String(rIndex) + ", "
+                             + String(tIndex) + ", "
+                             + String(endIndex) + "\n");
 
-  // Sanity check - search for start of chunk, and for existance of delims
-  if ((startIndex == 0) && (endIndex != -1) && (delim != -1)) {
+  // Sanity check - search for start of chunk, and for existance of delimeters
+  if ((xIndex == 0) && (yIndex != -1) && (rIndex != -1) && (tIndex != -1)  && (endIndex != -1) ) {
 
-    // Do the splitting with delims we found
-    // Format of chunk is "$rollVal|pitchVal#"
-    String rollStr = data.substring(startIndex + 1, delim);
-    String pitchStr = data.substring(delim + 1, endIndex);
+    // Do the splitting with delimeters we found
+    // Format of chunk is "XxaxisvalYyaxisvalRrotationvalTthrottleval#"
+    String xAxis = data.substring(xIndex + 1, yIndex);
+    String yAxis = data.substring(yIndex + 1, rIndex);
+    String rotation = data.substring(rIndex + 1, tIndex);
+    String throttle = data.substring(tIndex + 1, endIndex);    
 
-    Log(LOG_INFO, "Got roll: " + rollStr + "\n");
-    Log(LOG_INFO, "Got pitch " + pitchStr + "\n");
+    Log(LOG_INFO, "Got xAxis: " + xAxis + "\n");
+    Log(LOG_INFO, "Got yAxis: " + yAxis + "\n");
+    Log(LOG_INFO, "Got rotation: " + rotation + "\n");
+    Log(LOG_INFO, "Got throttle: " + throttle + "\n");
 
     // Convert and send to PWM
-    int rollVal = rollStr.toInt();
-    int pitchVal = pitchStr.toInt();
-    outputVoltage(ROLL_PWM_PORT, rollVal);
-    outputVoltage(PITCH_PWM_PORT, pitchVal);
+    int xAxisVal = xAxis.toInt();
+    int yAxisVal = yAxis.toInt();
+    int rotationVal = rotation.toInt();
+    int throttleVal = throttle.toInt();
+    outputVoltage(XAXIS_PWM_PORT, xAxisVal);
+    outputVoltage(YAXIS_PWM_PORT, yAxisVal);
+    outputVoltage(ROTATION_PWM_PORT, rotationVal);
+    outputVoltage(THROTTLE_PWM_PORT, throttleVal);
   } else {
     Log(LOG_ERROR, "Timeout!\n");
   }
