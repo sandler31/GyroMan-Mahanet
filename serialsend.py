@@ -4,6 +4,7 @@ import time
 import serial
 import threading
 
+
 class SerialSend(threading.Thread):
     serial_port = None
     baudrate = None
@@ -12,24 +13,24 @@ class SerialSend(threading.Thread):
     send_init_data = False
     running = False
     port = None
-    polltime = None # ms
+    polltime = None  # ms
 
     # Constants
     DATA_FORMAT = "${0}|{1}#\n"
     MID_VALUES = (66, 66)
 
-    def __init__(self, gyro_mon, serial_port = "/dev/ttyAMA0", baudrate = 115200,
-                                                timeout = 1, polltime = 20):
+    def __init__(self, gyro_mon, serial_port="/dev/ttyAMA0", baudrate=115200,
+                 timeout=1, polltime=20):
         self.serial_port = serial_port
         self.baudrate = baudrate
         self.timeout = timeout
-        self.polltime = polltime
+        self.polltime = float(polltime)
 
         # Init thread
         threading.Thread.__init__(self)
         self.daemon = True
-        self.port = serial.Serial(self.serial_port, baudrate = self.baudrate, 
-                                                        timeout = self.timeout)
+        self.port = serial.Serial(self.serial_port, baudrate=self.baudrate,
+                                  timeout=self.timeout)
 
         self.gyro_mon = gyro_mon
 
