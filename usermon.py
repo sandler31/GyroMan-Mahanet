@@ -29,6 +29,7 @@ class UserMon(threading.Thread):
     ZERO_THROTTLE = 0
     DIRECTION_POSITIVE = 1
     DIRECTION_NEGATIVE = -1
+    THROTTLE_CHANGE = 10
 
     def __init__(self, time_unit=100, action_time_units=25):
         # Init thread
@@ -71,12 +72,15 @@ class UserMon(threading.Thread):
         for i in range(self.action_time_units):
             self.direction_queues['y'].put(self.DIRECTION_POSITIVE)
 
-    def set_throttle(self, throttle):
+    def increase_throttle(self):
         with self.throttle_lock:
-            throttle = int(throttle)
-            if throttle < 0 or throttle > 100:
-                raise ValueError('Throttle must be between 0-100 percent')
-            self.throttle = throttle
+            if self.throttle < 100:
+                self.throttle += self.THROTTLE_CHANGE
+
+    def decrease_throttle(self):
+        with self.throttle_lock:
+            if self.throttle > 0:
+                self.throttle -= self.THROTTLE_CHANGE
 
     def update_values(self):
         for direction_queue in self.direction_queues.values():

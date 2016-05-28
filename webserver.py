@@ -46,5 +46,9 @@ class WebServer(object):
         self.user_mon.move_back()
 
     @cherrypy.expose
-    def set_throttle(self, throttle):
-        self.user_mon.set_throttle(throttle)
+    def increase_throttle(self):
+        self.user_mon.increase_throttle()
+
+    @cherrypy.expose
+    def decrease_throttle(self):
+        self.user_mon.decrease_throttle()
