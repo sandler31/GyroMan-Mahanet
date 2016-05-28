@@ -13,16 +13,16 @@ def main():
     print(open("banner").read())
     print()
 
-    gyro = None  # GyroMon()
+    gyro = GyroMon()
     user = UserMon()
-    # serial_send = SerialSend(user, gyro)
-    # gyro.start()
+    serial_send = SerialSend(user, gyro)
+    gyro.start()
     user.start()
-    # serial_send.start()
+    serial_send.start()
 
-    #raw_input("Press any key to start sending real data\n")
+    raw_input("Press any key to start sending real data\n")
 
-    # serial_send.start_real()    
+    serial_send.start_real()    
     dirname = os.getcwd()    
     cherrypy.quickstart(WebServer(user, gyro), '/', {
         'global':
