@@ -24,7 +24,7 @@ class SerialSend(threading.Thread):
         self.serial_port = serial_port
         self.baudrate = baudrate
         self.timeout = timeout
-        self.polltime = polltime
+        self.polltime = float(polltime)
 
         # Init thread
         threading.Thread.__init__(self)

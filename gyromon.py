@@ -20,16 +20,15 @@ class GyroMon(threading.Thread):
     POWER_MGMT = 0x6b
 
     def __init__(self, polltime=20):
-        self.polltime = polltime
+        self.polltime = float(polltime)
 
         # Init thread
         threading.Thread.__init__(self)
         self.daemon = True
 
-        # MPU Init
-        # or self.bus = smbus.SMBus(1) for Revision 2 boards
+        # MPU Init        
         self.bus = smbus.SMBus(1)
-        self.address = 0x68       # This is the address value read via the i2cdetect command
+        self.address = 0x68  # This is the address value read via the i2cdetect command
 
         # Now wake the 6050 up as it starts in sleep mode
         self.bus.write_byte_data(self.address, self.POWER_MGMT, 0)
@@ -71,9 +70,10 @@ class GyroMon(threading.Thread):
         return float(sum(nums)) / len(nums)
 
     def update_values_mpu(self):
-        gyro_xout = self.read_word_2c(0x43)
-        gyro_yout = self.read_word_2c(0x45)
-        gyro_zout = self.read_word_2c(0x47)
+        # never used?
+        # gyro_xout = self.read_word_2c(0x43)
+        # gyro_yout = self.read_word_2c(0x45)
+        # gyro_zout = self.read_word_2c(0x47)
 
         accel_xout = self.read_word_2c(0x3b)
         accel_yout = self.read_word_2c(0x3d)
