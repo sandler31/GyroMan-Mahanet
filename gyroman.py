@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
-# from gyromon import GyroMon
+from gyromon import GyroMon
 from usermon import UserMon
-# from serialsend import SerialSend
+from serialsend import SerialSend
 from webserver import WebServer
 import cherrypy
 import os
