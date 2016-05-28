@@ -2,61 +2,103 @@
 
 import time
 import threading
+import Queue
+
+"""
+This class receives user input to update the drones' x-axis, y-axis, rotation-axis and throttle.
+This class uses an actor model for controlling axis changes
+On an axis change, the change is inserted 'action_time_units' into a the appropriate queue.
+The queues are sampled every 'time_unit' milliseconds, and each axis is updated accordingly.
+This means that each 'action' is run for 'time_unit' *'action_time_units' milliseconds, and that the class is thread-safe.
+The defualt is 250ms for each action (10 * 25)
+"""
 
 
-class UserMon():
+class UserMon(threading.Thread):
+    x = None
+    y = None
+    running = False
     throttle = None  # percent
     rotation = None  # percent
-    rotation_lock = None
-    rotation_change = None
     time_unit = None
+    throttle_lock = None
+    direction_queues = None
+    action_time_units = None
 
     # Consts
     ZERO_THROTTLE = 0
-    ZERO_ROTATION = 50  # zero == left, 100 == right
+    DIRECTION_POSITIVE = 1
+    DIRECTION_NEGATIVE = -1
+    THROTTLE_CHANGE = 10
 
-    def __init__(self, time_unit=2, rotation_percent=50):
+    def __init__(self, time_unit=100, action_time_units=25):
+        # Init thread
+        threading.Thread.__init__(self)
+        self.daemon = True
+
+        self.x = 0
+        self.y = 0
         self.throttle = self.ZERO_THROTTLE
-        self.rotation = self.ZERO_ROTATION
-        self.rotation_lock = threading.Lock()
-        self.rotation_change = (self.ZERO_ROTATION * rotation_percent) / 100
+        self.rotation = 0
+        self.action_time_units = action_time_units
+        self.throttle_lock = threading.Lock()
+
         self.time_unit = float(time_unit) / 1000
+        self.direction_queues = {'x': Queue.Queue(),
+                                 'y': Queue.Queue(),
+                                 'rotation': Queue.Queue()}
 
-  # This one blocks for a while. use it with a new thread.
-    def __directional_range(self, start, end):
-        if start < end:
-            direction = 1
-        else:
-            direction = -1
+    def rotate_left(self):
+        for i in range(self.action_time_units):
+            self.direction_queues['rotation'].put(self.DIRECTION_NEGATIVE)
 
-        for i in range(start, end, direction):
+    def rotate_right(self):
+        for i in range(self.action_time_units):
+            self.direction_queues['rotation'].put(self.DIRECTION_POSITIVE)
+
+    def move_left(self):
+        for i in range(self.action_time_units):
+            self.direction_queues['x'].put(self.DIRECTION_NEGATIVE)
+
+    def move_right(self):
+        for i in range(self.action_time_units):
+            self.direction_queues['x'].put(self.DIRECTION_POSITIVE)
+
+    def move_back(self):
+        for i in range(self.action_time_units):
+            self.direction_queues['y'].put(self.DIRECTION_NEGATIVE)
+
+    def move_forward(self):
+        for i in range(self.action_time_units):
+            self.direction_queues['y'].put(self.DIRECTION_POSITIVE)
+
+    def increase_throttle(self):
+        with self.throttle_lock:
+            if self.throttle < 100:
+                self.throttle += self.THROTTLE_CHANGE
+
+    def decrease_throttle(self):
+        with self.throttle_lock:
+            if self.throttle > 0:
+                self.throttle -= self.THROTTLE_CHANGE
+
+    def update_values(self):
+        for direction_queue in self.direction_queues.values():
+            if direction_queue.empty():
+                direction_queue.put(0)
+
+        self.x = self.direction_queues['x'].get()
+        self.y = self.direction_queues['y'].get()
+        self.rotation = self.direction_queues['rotation'].get()
+
+    def run(self):
+        self.running = True
+        while self.running:
             time.sleep(self.time_unit)
-            yield i
-        yield end
+            self.update_values()
 
-    def set_throttle(self, throttle=50):
-        if throttle > 100 or throttle < 0:
-            raise ValueError("throttle must be between 0-100")
-
-        for i in self.__directional_range(self.throttle, throttle):
-            self.throttle = i
-
-    def __cancel_rotation(self):
-        for i in self.__directional_range(self.rotation, self.ZERO_ROTATION):
-            self.rotation = i
-
-    def __turn(self, rotation):
-        for i in self.__directional_range(self.rotation, rotation):
-            self.rotation = i
-        self.__cancel_rotation()
-
-    def turn_left(self):
-        with self.rotation_lock:
-            self.__turn(self.ZERO_ROTATION + self.rotation_change)
-
-    def turn_right(self):
-        with self.rotation_lock:
-            self.__turn(self.ZERO_ROTATION - self.rotation_change)
+    def cancel(self):
+        self.running = False
 
     def get_current_vals(self):
-        return self.throttle, self.rotation
+        return self.x, self.y, self.rotation, self.throttle

@@ -1,0 +1,110 @@
+<!DOCTYPE HTML>
+<HTML>
+    <HEAD>
+        <TITLE>Manual Remote</TITLE>
+    </HEAD>
+
+    <BODY>
+        <P>W: move forward </P>
+        <P>S: move back </P>
+        <P>A: move left </P>
+        <P>D: move right </P>
+        <P>Up: increse throttle </P>
+        <P>Down: decrese throttle </P>
+        <P>Left: rotate left </P>
+        <P>Right: rotate right </P>
+
+        <P id='stats'> </P>
+    <SCRIPT>
+        var stats = document.getElementById("stats");
+        window.addEventListener('keyup', doKeyPress, true);
+        window.setInterval(update_stats, 500);
+
+        function update_stats(){
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("GET", 'user_stats', true);
+            xhttp.onreadystatechange = function() {
+                if (xhttp.readyState ==4 && xhttp.status == 200){
+                    stats.innerHTML = xhttp.responseText;
+                }
+            };
+            xhttp.send();
+        }
+        function doKeyPress(e){
+            
+            //====================
+            //  THE W KEY
+            //====================
+            if (e.keyCode == 87) {
+                sendRequest('move_forward')
+                console.log('move_forward')
+            }
+
+            //====================
+            //  THE S KEY
+            //====================
+            if (e.keyCode == 83) {
+                sendRequest('move_back')
+                console.log('move_back')
+            }
+
+            //====================
+            //  THE A KEY
+            //====================
+            if (e.keyCode == 65) {
+                sendRequest('move_left')
+                console.log('move_left')
+            }
+
+            //====================
+            //  THE D KEY
+            //====================
+            if (e.keyCode == 68) {
+                sendRequest('move_right')               
+                console.log('move_right')               
+            }
+
+            //====================
+            //  THE up KEY
+            //====================
+            if (e.keyCode == 38) {
+                sendRequest('increase_throttle')
+                console.log('increase_throttle')
+            }
+
+            //====================
+            //  THE down KEY
+            //====================
+            if (e.keyCode == 40) {
+                sendRequest('decrease_throttle')
+                console.log('decrease_throttle')
+            }
+
+            //====================
+            //  THE left KEY
+            //====================
+            if (e.keyCode == 37) {
+                sendRequest('rotate_left')
+                console.log('rotate_left')
+            }
+
+            //====================
+            //  THE right KEY
+            //====================
+            if (e.keyCode == 39) {
+                sendRequest('rotate_right')               
+                console.log('rotate_right')               
+            }           
+        }
+
+        function sendRequest(path)
+        {
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("GET", path, true);
+            xhttp.send();
+        }
+
+    </SCRIPT>
+
+    </BODY>
+</HTML>
