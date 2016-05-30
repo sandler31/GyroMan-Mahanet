@@ -1,7 +1,7 @@
 #define XAXIS_PWM_PORT 5
 #define YAXIS_PWM_PORT 6
-#define ROTATION_PWM_PORT 7
-#define THROTTLE_PWM_PORT 8
+#define ROTATION_PWM_PORT 3
+#define THROTTLE_PWM_PORT 9
 #define LOG_NONE 0
 #define LOG_INFO 1
 #define LOG_ERROR 1
