@@ -18,7 +18,7 @@ class SerialSend(threading.Thread):
 
     # Constants
     DATA_FORMAT = "X{0}Y{1}R{2}T{3}#\n"
-    INIT_VALUES = (50, 50, 50, 30)
+    INIT_VALUES = (50, 50, 50, 0)
     USER_CONVERSION_RATE = (0.5, 0.5, 0.5)
 
     def __init__(self, user_mon, gyro_mon,
