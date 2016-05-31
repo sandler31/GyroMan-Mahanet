@@ -6,7 +6,41 @@
 #define LOG_INFO 1
 #define LOG_ERROR 1
 #define LOG_DEBUG 2
-#define LOGLEVEL LOG_DEBUG
+#define LOGLEVEL LOG_NONE
+
+/*
+ * Sets PWM frequency for given channel
+ */
+void setPwmFrequency(int pin, int divisor) {
+  byte mode;
+  if(pin == 5 || pin == 6 || pin == 9 || pin == 10) {
+    switch(divisor) {
+      case 1: mode = 0x01; break;
+      case 8: mode = 0x02; break;
+      case 64: mode = 0x03; break;
+      case 256: mode = 0x04; break;
+      case 1024: mode = 0x05; break;
+      default: return;
+    }
+    if(pin == 5 || pin == 6) {
+      TCCR0B = TCCR0B & 0b11111000 | mode;
+    } else {
+      TCCR1B = TCCR1B & 0b11111000 | mode;
+    }
+  } else if(pin == 3 || pin == 11) {
+    switch(divisor) {
+      case 1: mode = 0x01; break;
+      case 8: mode = 0x02; break;
+      case 32: mode = 0x03; break;
+      case 64: mode = 0x04; break;
+      case 128: mode = 0x05; break;
+      case 256: mode = 0x06; break;
+      case 1024: mode = 0x7; break;
+      default: return;
+    }
+    TCCR2B = TCCR2B & 0b11111000 | mode;
+  }
+}
 
 /*
  * ...
@@ -14,6 +48,11 @@
 void setup()
 {
   Serial.begin(115200);
+
+  setPwmFrequency(XAXIS_PWM_PORT, 1);
+  setPwmFrequency(YAXIS_PWM_PORT, 1);
+  setPwmFrequency(ROTATION_PWM_PORT, 1);
+  setPwmFrequency(THROTTLE_PWM_PORT, 1);
   
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
