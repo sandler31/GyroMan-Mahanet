@@ -27,11 +27,12 @@ class UserMon(threading.Thread):
 
     # Consts
     ZERO_THROTTLE = 0
+    THROTTLE_CHANGE = 5
+    DIRECTION_NONE = 0
     DIRECTION_POSITIVE = 1
     DIRECTION_NEGATIVE = -1
-    THROTTLE_CHANGE = 10
 
-    def __init__(self, time_unit=100, action_time_units=25):
+    def __init__(self, time_unit=1): #, action_time_units=3):
         # Init thread
         threading.Thread.__init__(self)
         self.daemon = True
@@ -40,37 +41,35 @@ class UserMon(threading.Thread):
         self.y = 0
         self.throttle = self.ZERO_THROTTLE
         self.rotation = 0
-        self.action_time_units = action_time_units
         self.throttle_lock = threading.Lock()
 
-        self.time_unit = float(time_unit) / 1000
-        self.direction_queues = {'x': Queue.Queue(),
-                                 'y': Queue.Queue(),
-                                 'rotation': Queue.Queue()}
-
     def rotate_left(self):
-        for i in range(self.action_time_units):
-            self.direction_queues['rotation'].put(self.DIRECTION_NEGATIVE)
+        self.rotation = self.DIRECTION_NEGATIVE
 
     def rotate_right(self):
-        for i in range(self.action_time_units):
-            self.direction_queues['rotation'].put(self.DIRECTION_POSITIVE)
+        self.rotation = self.DIRECTION_POSITIVE
+
+    def reset_rotate(self):
+        self.rotation = self.DIRECTION_NONE
 
     def move_left(self):
-        for i in range(self.action_time_units):
-            self.direction_queues['x'].put(self.DIRECTION_NEGATIVE)
+        self.x = self.DIRECTION_NEGATIVE
 
     def move_right(self):
-        for i in range(self.action_time_units):
-            self.direction_queues['x'].put(self.DIRECTION_POSITIVE)
+        self.x = self.DIRECTION_POSITIVE
+
+    def reset_x(self):
+        self.x = self.DIRECTION_NONE
 
     def move_back(self):
-        for i in range(self.action_time_units):
-            self.direction_queues['y'].put(self.DIRECTION_NEGATIVE)
+        self.y = self.DIRECTION_NEGATIVE
 
     def move_forward(self):
-        for i in range(self.action_time_units):
-            self.direction_queues['y'].put(self.DIRECTION_POSITIVE)
+        self.y = self.DIRECTION_POSITIVE
+
+    def reset_y(self):
+        self.y = self.DIRECTION_NONE
+
 
     def increase_throttle(self):
         with self.throttle_lock:
@@ -82,23 +81,9 @@ class UserMon(threading.Thread):
             if self.throttle > 0:
                 self.throttle -= self.THROTTLE_CHANGE
 
-    def update_values(self):
-        for direction_queue in self.direction_queues.values():
-            if direction_queue.empty():
-                direction_queue.put(0)
-
-        self.x = self.direction_queues['x'].get()
-        self.y = self.direction_queues['y'].get()
-        self.rotation = self.direction_queues['rotation'].get()
-
-    def run(self):
-        self.running = True
-        while self.running:
-            time.sleep(self.time_unit)
-            self.update_values()
-
-    def cancel(self):
-        self.running = False
+    def reset_throttle(self):
+        with self.throttle_lock:
+            self.throttle = self.ZERO_THROTTLE
 
     def get_current_vals(self):
         return self.x, self.y, self.rotation, self.throttle

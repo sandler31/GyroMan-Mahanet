@@ -14,6 +14,8 @@ class GyroMon(threading.Thread):
     average_array_x = None
     average_array_y = None
     polltime = None  # ms
+    x = 0
+    y = 0
 
     # Consts
     DIVISOR = 10
@@ -105,4 +107,5 @@ class GyroMon(threading.Thread):
         self.running = False
 
     def get_current_vals(self):
+        # print self.x, self.y
         return self.x, self.y

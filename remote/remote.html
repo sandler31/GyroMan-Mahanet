@@ -13,12 +13,23 @@
         <P>Down: decrese throttle </P>
         <P>Left: rotate left </P>
         <P>Right: rotate right </P>
+        <P>X: change control </P>
+        <P>Space: Kill throttle </P>
 
         <P id='stats'> </P>
     <SCRIPT>
         var stats = document.getElementById("stats");
-        window.addEventListener('keyup', doKeyPress, true);
+        window.addEventListener('keydown', doKeyDown, true);
+        window.addEventListener('keyup', doKeyUp, true);
         window.setInterval(update_stats, 500);
+        
+        var w = false;
+        var a = false;
+        var s = false;
+        var d = false;
+
+        var left = false;
+        var right = false;
 
         function update_stats(){
             var xhttp = new XMLHttpRequest();
@@ -30,12 +41,13 @@
             };
             xhttp.send();
         }
-        function doKeyPress(e){
-            
+
+        function doKeyDown(e){            
             //====================
             //  THE W KEY
             //====================
-            if (e.keyCode == 87) {
+            if (e.keyCode == 87 && w == false) {
+                w = true;
                 sendRequest('move_forward')
                 console.log('move_forward')
             }
@@ -43,7 +55,8 @@
             //====================
             //  THE S KEY
             //====================
-            if (e.keyCode == 83) {
+            if (e.keyCode == 83 && s == false) {
+                s = true;
                 sendRequest('move_back')
                 console.log('move_back')
             }
@@ -51,7 +64,8 @@
             //====================
             //  THE A KEY
             //====================
-            if (e.keyCode == 65) {
+            if (e.keyCode == 65 && a == false) {
+                a = true;
                 sendRequest('move_left')
                 console.log('move_left')
             }
@@ -59,11 +73,86 @@
             //====================
             //  THE D KEY
             //====================
-            if (e.keyCode == 68) {
+            if (e.keyCode == 68 && d == false) {
+                d = true;
                 sendRequest('move_right')               
                 console.log('move_right')               
             }
 
+            //====================
+            //  THE left KEY
+            //====================
+            if (e.keyCode == 37 && left == false) {
+                left = true;
+                sendRequest('rotate_left')
+                console.log('rotate_left')
+            }
+
+            //====================
+            //  THE right KEY
+            //====================
+            if (e.keyCode == 39 && right == false) {
+                right = true;
+                sendRequest('rotate_right')         
+                console.log('rotate_right')               
+            }           
+        }
+
+        function doKeyUp(e){            
+            //====================
+            //  THE W KEY
+            //====================
+            if (e.keyCode == 87 && w == true) {
+                w = false;
+                sendRequest('reset_y')
+                console.log('w_reset_y')
+            }
+
+            //====================
+            //  THE S KEY
+            //====================
+            if (e.keyCode == 83 && s == true) {
+                s = false;
+                sendRequest('reset_y')
+                console.log('s_reset_y')
+            }
+
+            //====================
+            //  THE A KEY
+            //====================
+            if (e.keyCode == 65 && a == true) {
+                a = false;
+                sendRequest('reset_x')
+                console.log('a_reset_x')
+            }
+
+            //====================
+            //  THE D KEY
+            //====================
+            if (e.keyCode == 68 && d == true) {
+                d = false;
+                sendRequest('reset_x')               
+                console.log('d_reset_x')               
+            }
+
+            //====================
+            //  THE left KEY
+            //====================
+            if (e.keyCode == 37 && left == true) {
+                left = false;
+                sendRequest('reset_rotate')
+                console.log('left_reset_rotate')
+            }
+
+            //====================
+            //  THE right KEY
+            //====================
+            if (e.keyCode == 39 && right == true) {
+                right = false;
+                sendRequest('reset_rotate')         
+                console.log('right_reset_rotate')               
+            }           
+        
             //====================
             //  THE up KEY
             //====================
@@ -79,23 +168,22 @@
                 sendRequest('decrease_throttle')
                 console.log('decrease_throttle')
             }
-
             //====================
-            //  THE left KEY
+            //  THE space KEY
             //====================
-            if (e.keyCode == 37) {
-                sendRequest('rotate_left')
-                console.log('rotate_left')
+            if (e.keyCode == 32) {
+                sendRequest('reset_throttle')
+                console.log('reset_throttle')
             }
-
             //====================
-            //  THE right KEY
+            //  THE space KEY
             //====================
-            if (e.keyCode == 39) {
-                sendRequest('rotate_right')               
-                console.log('rotate_right')               
-            }           
+            if (e.keyCode == 88) {
+                sendRequest('user_control')
+                console.log('user_control')
+            }
         }
+        
 
         function sendRequest(path)
         {

@@ -11,20 +11,21 @@ import os.path
 
 def main():
     print(open("banner").read())
-    print()
+    print("")
 
     gyro = GyroMon()
     user = UserMon()
     serial_send = SerialSend(user, gyro)
     gyro.start()
-    user.start()
+    #user.start()
     serial_send.start()
 
     raw_input("Press any key to start sending real data\n")
 
     serial_send.start_real()    
-    dirname = os.getcwd()    
-    cherrypy.quickstart(WebServer(user, gyro), '/', {
+    dirname = os.getcwd()
+    cherrypy.log.screen = None
+    cherrypy.quickstart(WebServer(user, gyro, serial_send), '/', {
         'global':
             {
                 'server.socket_host': '0.0.0.0',

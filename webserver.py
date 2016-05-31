@@ -6,10 +6,12 @@ import cherrypy
 class WebServer(object):
     gyro_mon = None
     user_mon = None
+    serial_send = None
 
-    def __init__(self, user_mon, gyro_mon):
+    def __init__(self, user_mon, gyro_mon, serial_send):
         self.gyro_mon = gyro_mon
         self.user_mon = user_mon
+        self.serial_send = serial_send
 
     @cherrypy.expose
     def index(self):
@@ -19,7 +21,7 @@ class WebServer(object):
     @cherrypy.expose
     def user_stats(self):
         x, y, rotation, throttle = self.user_mon.get_current_vals()
-        return "{0} {1} {2} {3}".format(x, y, rotation, throttle)
+        return "X:{0} Y:{1} Rotation:{2} Throttle:{3} User Control:{4}".format(x, y, rotation, throttle, self.serial_send.user_control)
 
     @cherrypy.expose
     def rotate_left(self):
@@ -30,12 +32,20 @@ class WebServer(object):
         self.user_mon.rotate_right()
 
     @cherrypy.expose
+    def reset_rotate(self):
+        self.user_mon.reset_rotate()
+
+    @cherrypy.expose
     def move_left(self):
         self.user_mon.move_left()
 
     @cherrypy.expose
     def move_right(self):
         self.user_mon.move_right()
+
+    @cherrypy.expose
+    def reset_x(self):
+        self.user_mon.reset_x()
 
     @cherrypy.expose
     def move_forward(self):
@@ -46,9 +56,21 @@ class WebServer(object):
         self.user_mon.move_back()
 
     @cherrypy.expose
+    def reset_y(self):
+        self.user_mon.reset_y()
+
+    @cherrypy.expose
     def increase_throttle(self):
         self.user_mon.increase_throttle()
 
     @cherrypy.expose
     def decrease_throttle(self):
         self.user_mon.decrease_throttle()
+
+    @cherrypy.expose
+    def reset_throttle(self):
+        self.user_mon.reset_throttle()
+
+    @cherrypy.expose
+    def user_control(self):
+        self.serial_send.change_control()
