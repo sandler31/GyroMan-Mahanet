@@ -21,13 +21,13 @@ class UserMon(threading.Thread):
     throttle = None  # percent
     rotation = None  # percent
     time_unit = None
-    throttle_lock = None
     direction_queues = None
     action_time_units = None
 
     # Consts
     ZERO_THROTTLE = 0
-    THROTTLE_CHANGE = 5
+    THROTTLE_CHANGE_BIG = 5
+    THROTTLE_CHANGE_SMALL = 1
     DIRECTION_NONE = 0
     DIRECTION_POSITIVE = 1
     DIRECTION_NEGATIVE = -1
@@ -41,7 +41,7 @@ class UserMon(threading.Thread):
         self.y = 0
         self.throttle = self.ZERO_THROTTLE
         self.rotation = 0
-        self.throttle_lock = threading.Lock()
+
 
     def rotate_left(self):
         self.rotation = self.DIRECTION_NEGATIVE
@@ -70,20 +70,23 @@ class UserMon(threading.Thread):
     def reset_y(self):
         self.y = self.DIRECTION_NONE
 
+    def set_throttle(self, val):
+        self.throttle = max(0, min(self.throttle + val, 100))
 
     def increase_throttle(self):
-        with self.throttle_lock:
-            if self.throttle < 100:
-                self.throttle += self.THROTTLE_CHANGE
+        self.set_throttle(self.THROTTLE_CHANGE_BIG)
 
     def decrease_throttle(self):
-        with self.throttle_lock:
-            if self.throttle > 0:
-                self.throttle -= self.THROTTLE_CHANGE
+        self.set_throttle(self.THROTTLE_CHANGE_BIG * -1)
 
+    def slight_increase_throttle(self):
+        self.set_throttle(self.THROTTLE_CHANGE_SMALL)
+
+    def slight_decrease_throttle(self):
+        self.set_throttle(self.THROTTLE_CHANGE_SMALL * -1)
+        
     def reset_throttle(self):
-        with self.throttle_lock:
-            self.throttle = self.ZERO_THROTTLE
+        self.throttle = self.ZERO_THROTTLE
 
     def get_current_vals(self):
         return self.x, self.y, self.rotation, self.throttle

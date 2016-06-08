@@ -16,12 +16,12 @@ class WebServer(object):
     @cherrypy.expose
     def index(self):
         x, y = self.gyro_mon.get_current_vals()
-        return "{0:.2f} {1:.2f}".format(x, y)
+        return "{0:.2f} {1:.2f}".format(y, x)
 
     @cherrypy.expose
     def user_stats(self):
         x, y, rotation, throttle = self.user_mon.get_current_vals()
-        return "X:{0} Y:{1} Rotation:{2} Throttle:{3} User Control:{4}".format(x, y, rotation, throttle, self.serial_send.user_control)
+        return "X:{0}<br>Y:{1}<br>Rotation:{2}<br>Throttle:{3}<br>User Control:{4}<br>Camera Mode:{5}".format(x, y, rotation, throttle, self.serial_send.user_control, self.serial_send.camera_mode)
 
     @cherrypy.expose
     def rotate_left(self):
@@ -64,8 +64,16 @@ class WebServer(object):
         self.user_mon.increase_throttle()
 
     @cherrypy.expose
+    def slight_increase_throttle(self):
+        self.user_mon.slight_increase_throttle()
+
+    @cherrypy.expose
     def decrease_throttle(self):
         self.user_mon.decrease_throttle()
+
+    @cherrypy.expose
+    def slight_decrease_throttle(self):
+        self.user_mon.slight_decrease_throttle()
 
     @cherrypy.expose
     def reset_throttle(self):
@@ -74,3 +82,7 @@ class WebServer(object):
     @cherrypy.expose
     def user_control(self):
         self.serial_send.change_control()
+
+    @cherrypy.expose
+    def toggle_camera_mode(self):
+        self.serial_send.toggle_camera_mode()

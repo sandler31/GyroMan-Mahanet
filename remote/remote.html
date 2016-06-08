@@ -15,6 +15,8 @@
         <P>Right: rotate right </P>
         <P>X: change control </P>
         <P>Space: Kill throttle </P>
+        <P> H: Use Camera </P>
+        <P> -------------------- </P>
 
         <P id='stats'> </P>
     <SCRIPT>
@@ -157,17 +159,59 @@
             //  THE up KEY
             //====================
             if (e.keyCode == 38) {
-                sendRequest('increase_throttle')
-                console.log('increase_throttle')
+                if (e.shiftKey){
+                    sendRequest('slight_increase_throttle')
+                    console.log('sight_increase_throttle')
+                }
+                else
+                {
+                    sendRequest('increase_throttle')
+                    console.log('increase_throttle')
+                }
             }
 
             //====================
             //  THE down KEY
             //====================
             if (e.keyCode == 40) {
-                sendRequest('decrease_throttle')
-                console.log('decrease_throttle')
+                if (e.shiftKey)
+                {
+                    sendRequest('slight_decrease_throttle')
+                    console.log('slight_decrease_throttle')   
+                }
+                else
+                {
+                    sendRequest('decrease_throttle')
+                    console.log('decrease_throttle')
+                }
             }
+
+            //====================
+            //  THE h KEY
+            //====================
+            if (e.keyCode == 72) {
+                sendRequest('toggle_camera_mode')
+                console.log('toggle_camera_mode')
+            }
+            // console.log(e.keyCode)
+            // //====================
+            // //  THE up KEY
+            // //====================
+            // if (e.keyCode == 38) {
+            //     sendRequest('small_increase_throttle')
+            //     console.log('small_increase_throttle')
+            // }
+
+            // //====================
+            // //  THE down KEY
+            // //====================
+            // if (e.keyCode == 40) {
+            //     sendRequest('small_decrease_throttle')
+            //     console.log('small_decrease_throttle')
+            // }
+
+
+
             //====================
             //  THE space KEY
             //====================

@@ -17,13 +17,17 @@ class SerialSend(threading.Thread):
     port = None
     polltime = None  # ms
     user_control = None
+    camera_mode = None
 
     # Constants
     DATA_FORMAT = "X{0}Y{1}R{2}T{3}#\n"
     INIT_VALUES = (50, 50, 50, 0)
-    CORRECTION_VALUES = (3, -3.5, -5, 0)
+    #x y rotation throttle
+    CORRECTION_VALUES = (3, -3.5, 0, 0)
     USER_CONVERSION_RATE = (0.75, 0.75, 0.75)
-    GYRO_CONVERSION_RATE = (10, 15)
+    # GYRO_CONVERSION_RATE = (10, 15)
+    GYRO_CONVERSION_RATE = (10, 15, 10)
+    
 
 
     def __init__(self, user_mon, gyro_mon,
@@ -43,14 +47,17 @@ class SerialSend(threading.Thread):
         self.gyro_mon = gyro_mon
         self.user_mon = user_mon
         self.user_control = True
+        self.camera_mode = False
 
     def limit(self, val):
         return max(0, min(100, val))
 
     def calc_gyro_percent(self):
+        # rotation, y = self.gyro_mon.get_current_vals()
         x, y = self.gyro_mon.get_current_vals()
-        return int((x / -180) * 100) * self.GYRO_CONVERSION_RATE[0] + 50 + self.CORRECTION_VALUES[0], \
-               int((y / 180 ) * 100) * self.GYRO_CONVERSION_RATE[1] + 50 + self.CORRECTION_VALUES[1]
+        return int((x / -180)  * 100) * self.GYRO_CONVERSION_RATE[0] + 50 + self.CORRECTION_VALUES[0], \
+               int((y /  180)  * 100) * self.GYRO_CONVERSION_RATE[1] + 50 + self.CORRECTION_VALUES[1],  \
+               int((x / -180)  * 100) * self.GYRO_CONVERSION_RATE[2] + 50 + self.CORRECTION_VALUES[2] # rotation
 
     def calc_user_percent(self):
         x, y, rotation, throttle = self.user_mon.get_current_vals()
@@ -66,14 +73,27 @@ class SerialSend(threading.Thread):
         return x, y, rotation, throttle
 
     def get_data(self):
-        x, y = self.calc_gyro_percent()
-        user_x, user_y, rotation, throttle = self.calc_user_percent()
+        #x, rotation = None
+        x, y, rotation = self.calc_gyro_percent()
+        # rotation, y = self.calc_gyro_percent()
+        user_x, user_y, user_rotation, throttle = self.calc_user_percent()
+        # x, user_y, user_rotation, throttle = self.calc_user_percent()
+        if self.camera_mode:
+            #rotation = gyro_rotation
+            x = user_x
+        else:
+            rotation = user_rotation
+            #x = gyro_x
         if self.user_control:
-            x, y = user_x, user_y
+            # y, rotation = user_y, user_rotation
+            x, y, rotation = user_x, user_y, user_rotation
         return self.limit(x), self.limit(y), self.limit(rotation), self.limit(throttle)
 
     def change_control(self):
         self.user_control = not self.user_control
+
+    def toggle_camera_mode(self):
+        self.camera_mode = not self.camera_mode
         
     def run(self):
         self.send_init_data = True
